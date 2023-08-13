@@ -1,21 +1,11 @@
 
 
-def get_laptime_str(laptime: float) -> str:
-    mins = int(laptime//60)
-    secs = int((laptime - (mins*60))//1)
-    tenths = round(laptime - ((mins*60)+secs), 2)
-    tenths_str = str(tenths).split(".")[1]
-    if tenths < .10:
-        tenths_str = "0"+tenths_str
-
-    if mins < 10:
-        mins_str = "0"+str(mins)
+def get_laptime_str(laptime_float) -> str:
+    if not laptime_float or (laptime_float and laptime_float < 0):
+        return_str = 'No data'
     else:
-        mins_str = str(mins)
-    if secs < 10:
-        secs_str = "0"+str(secs)
-    else:
-        secs_str = str(secs)
-    return_str = f"{str(mins_str)}:{str(secs_str)}.{tenths_str}"
-
+        mins, secs = divmod(laptime_float, 60)
+        tenths = (laptime_float - (int(mins) * 60 + int(secs))) * 100
+        time_ls = [int(mins // 1), int(secs // 1), int(tenths // 1)]
+        return_str = "{:02d}:{:02d}.{:02d}".format(*time_ls)
     return return_str
