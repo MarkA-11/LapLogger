@@ -1,5 +1,3 @@
-
-
 def get_laptime_str(laptime_float) -> str:
     if not laptime_float or (laptime_float and laptime_float < 0):
         return_str = 'No data'
