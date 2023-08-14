@@ -89,8 +89,6 @@ class LapLogger(DataLogger):
     def event_deactivated(self):
         print("\n")
         self.generate_summary()
-        # need to make sure that export data works reliably
-        # self.export_data()
         print("\nStopping lap logging session")
         super().event_deactivated()
 
@@ -162,16 +160,3 @@ class LapLogger(DataLogger):
         print(f"\nLap time summary - \n\tMean: {mean_str}, "
               f"Fastest: {fastest_str} (-{fastest_delta_str}s to mean), "
               f"Slowest: {slowest_str} (+{slowest_delta_str}s to mean)\n")
-
-    def export_data(self):
-        date_time_str = datetime.now().strftime("%d-%m-%y_%H-%M-%S")+".txt"
-        if self.ir['WeekendInfo']['TrackName']:
-            track_name_str = self.ir['WeekendInfo']['TrackName'].replace(' ', '_')
-        else:
-            track_name_str = ''
-        file_name_str = track_name_str+"_"+date_time_str
-        print(f"exporting data to {file_name_str} (not implemented in {self.version})")
-        # need to check this - causes a crash on first use / if lap logger running before iracing ?
-        # might be an issue with working directory if launched by double-clicking?
-        with open(file_name_str, 'w') as file:
-            file.write('placeholder file for session data export')
