@@ -1,6 +1,5 @@
 import irsdk
 import time
-from datetime import datetime
 from Functions import get_laptime_str
 
 
@@ -69,7 +68,8 @@ class LapLogger(DataLogger):
 
         self.laps_complete = 0
         self.session_lap = 0
-        self.lap_log_dict = {'lap': [],
+        self.lap_log_dict = {'data': [],
+                             'lap': [],
                              'time': []}
 
         # replace this with a counter / collector class ?
@@ -80,6 +80,8 @@ class LapLogger(DataLogger):
 
     def event_activated(self):
         super().event_activated()
+        # pause to let the lap number increment
+        time.sleep(2)
         self.laps_complete = self.ir['Lap']
         self.session_lap = 0
         self.lap_log_dict = {'lap': [],
@@ -87,7 +89,6 @@ class LapLogger(DataLogger):
         self.add_start_data()
 
     def event_deactivated(self):
-        print("\n")
         self.generate_summary()
         print("\nStopping lap logging session")
         super().event_deactivated()
@@ -96,7 +97,6 @@ class LapLogger(DataLogger):
         super().loop()
 
         # if a new lap has been completed then trigger delayed collection of the lap time
-        # (last lap time updates a little while after the car crosses the line)
         if self.tick_dict['Lap'] > self.laps_complete:
             self.laps_complete = self.tick_dict['Lap']
             # set the lap time collect flag and reset the counter
@@ -106,15 +106,21 @@ class LapLogger(DataLogger):
 
         # if waiting to collect a lap time and target delay has been reached then get the lap time str
         if self.collect_lap_time and self.collect_delay_count >= self.collect_delay_tgt:
+            # could base this on collect = True and LapLastLapTime changing instead of waiting a fixed amount of time?
+
             # reset the collect flag and the counter
             self.collect_lap_time = False
             self.collect_delay_count = 0
             # get the last lap time as a string and print it
             last_lap_time_str = get_laptime_str(self.tick_dict['LapLastLapTime'])
             print(f"Lap {str(self.session_lap)}:\t{last_lap_time_str}")
+            if last_lap_time_str != 'No data':
+                self.lap_log_dict['data'].append(True)
+            else:
+                self.lap_log_dict['data'].append(False)
             # add lap and time to the data log dict
             self.lap_log_dict['lap'].append(self.session_lap)
-            self.lap_log_dict['time'].append(self.tick_dict['LapLatLapTime'])
+            self.lap_log_dict['time'].append(self.tick_dict['LapLastLapTime'])
             # increment logging session lap number (after printing lap_time_str so that lap 0 is the out lap)
             self.session_lap += 1
         # if waiting to collect a lap time and target delay not reached increment the counter
@@ -142,21 +148,28 @@ class LapLogger(DataLogger):
         print("\nSession lap times:")
 
     def generate_summary(self):
-        # generate a lap time summary (excluding the out lap)
-        fastest_time = min(self.lap_log_dict['time'][1:])
-        slowest_time = max(self.lap_log_dict['time'][1:])
-        total_time = sum(self.lap_log_dict['time'][1:])
-        mean_time = total_time / (len(self.lap_log_dict['time']) - 1)
 
-        fastest_delta = abs(fastest_time - mean_time)
-        slowest_delta = abs(slowest_time - mean_time)
+        """
+        Update this to use the 'data' key in lap_log_dict to work out which values to include rather than
+        just excluding the first item
+        """
+        if len(self.lap_log_dict['lap']) > 1:
+            fastest_time = min(self.lap_log_dict['time'][1:])
+            slowest_time = max(self.lap_log_dict['time'][1:])
+            total_time = sum(self.lap_log_dict['time'][1:])
+            mean_time = total_time / (len(self.lap_log_dict['time']) - 1)
 
-        fastest_str = get_laptime_str(fastest_time)
-        mean_str = get_laptime_str(mean_time)
-        slowest_str = get_laptime_str(slowest_time)
-        fastest_delta_str = str(round(fastest_delta, 2))
-        slowest_delta_str = str(round(slowest_delta, 2))
+            fastest_delta = abs(fastest_time - mean_time)
+            slowest_delta = abs(slowest_time - mean_time)
 
-        print(f"\nLap time summary - \n\tMean: {mean_str}, "
-              f"Fastest: {fastest_str} (-{fastest_delta_str}s to mean), "
-              f"Slowest: {slowest_str} (+{slowest_delta_str}s to mean)\n")
+            fastest_str = get_laptime_str(fastest_time)
+            mean_str = get_laptime_str(mean_time)
+            slowest_str = get_laptime_str(slowest_time)
+            fastest_delta_str = str(round(fastest_delta, 2))
+            slowest_delta_str = str(round(slowest_delta, 2))
+
+            print(f"\nLap time summary - \n\tMean: {mean_str}, "
+                  f"\n\tFastest: {fastest_str} (-{fastest_delta_str}s to mean), "
+                  f"\n\tSlowest: {slowest_str} (+{slowest_delta_str}s to mean)\n")
+        else:
+            print("\nNo lap data\n")
