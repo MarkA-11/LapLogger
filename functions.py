@@ -1,4 +1,9 @@
 def get_time_str(laptime_float) -> str:
+    """
+    Get a formatted time string from a float value
+    :param laptime_float: time in seconds
+    :return: formatted time string
+    """
     if not laptime_float or (laptime_float and laptime_float < 0):
         return_str = 'No data'
     else:
@@ -10,12 +15,22 @@ def get_time_str(laptime_float) -> str:
 
 
 def ms_to_mph_str(ms_speed_float) -> str:
+    """
+    Get a speed string in mph from a float value
+    :param ms_speed_float: speed in metres / second
+    :return: speed string (mph)
+    """
     mph_val = round((ms_speed_float * 3600) / 1609, 2)
     mph_str = mph_val = str(mph_val) + " MPH"
     return mph_str
 
 
 def ms_to_kph_str(ms_speed_float) -> str:
+    """
+    Get a speed string in kph from a float value
+    :param ms_speed_float: speed in metres / second
+    :return: speed string (kph)
+    """
     kph_val = round((ms_speed_float * 3600) / 1000, 2)
     kph_str = str(kph_val) + " KPH"
     return kph_str
