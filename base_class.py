@@ -7,16 +7,17 @@ and have the base functionality described below, see lap_logger.py for an exampl
 from this base class.
 
     The check_connection function will determine if a running sim is currently connected (or if an ibt file is to be 
-    played back and data is available from it - see below) and set the connected variable accordingly.
+    played back and if data is available from it - see below) and set the connected variable accordingly.
     
     main.py will execute the classes loop function while connected to a running sim (or whilst playing back an ibt file 
-    - see below) with data collected at the defined sample rate. The keys of the data to be collected are defined in the
-    data_key_ls variable and the loop function in the base class updates the tick_dict variable with the latest sample 
-    ready to work with. The data sample can then be accessed in the loop function via the keys of the tick_dict.
+    - see below) with data collected at the defined sample rate (max 60 samples/sec). The keys of the data to be 
+    collected are defined in the data_key_ls variable and the loop function in the base class updates the tick_dict 
+    variable with the latest sample ready to work with. The data sample can then be accessed in the loop function 
+    via the keys of the tick_dict.
     
     The loop function can be utilised in two different ways: The code can effectively be executed while the sim is 
-    connected by treating the loop function as a single run through. Alternatively code can be executed while a 
-    particular condition within the data itself are met. For example, The loop function within the LapLogger class 
+    connected by treating the loop function as a single run through. Alternatively, code can be executed while a 
+    particular condition within the data itself is met. For example, The loop function within the LapLogger class 
     uses a while loop to run a lap logging session while the IsOnTrack parameter is true. 
     
     The update_tick_dict function will wait for the sample interval and then update the tick_dict with the latest data 
