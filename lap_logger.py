@@ -11,7 +11,7 @@ class LapLogger(DataLogger):
     def __init__(self, ibt_file=None, real_time_ibt=False):
         # a name and current version for our class
         name = "lap logger"
-        version = "0.1"
+        version = "1.0"
         # logging lap completion 2 samples / sec is sufficient but should be higher for real time telemetry
         sample_rate = 2
         # set up the keys for the data that we will want to access
