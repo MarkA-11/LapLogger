@@ -12,8 +12,8 @@ class LapLogger(DataLogger):
         # a name and current version for our class
         name = "lap logger"
         version = "0.1"
-        # logging lap completion so 1 sample / sec is sufficient but should be higher for real time telemetry
-        sample_rate = 1
+        # logging lap completion 2 samples / sec is sufficient but should be higher for real time telemetry
+        sample_rate = 2
         # set up the keys for the data that we will want to access
         data_key_ls = ['IsOnTrack', 'Lap', 'LapCompleted', 'LapLastLapTime', 'FuelLevel']
 
@@ -39,12 +39,12 @@ class LapLogger(DataLogger):
 
         # check if the car is on track with the driver in it
         if self.tick_dict['IsOnTrack']:
-            # if it is then set up for lap logging
+            # if it is then set up for a lap logging session
             # pause to let the laps complete value update settle
             self.wait(2)
             # update the tick_dict
             self.update_tick_dict()
-            # set the session lap count to 0 and get the laps completed, last lap time
+            # set the session lap count to 0 and get the laps completed and last lap time
             session_lap = 0
             laps_complete = self.tick_dict['LapCompleted']
             last_lap_time = self.tick_dict['LapLastLapTime']
@@ -61,7 +61,7 @@ class LapLogger(DataLogger):
             # the while loop runs the lap logging session while the car is on track with the driver in it
             while self.tick_dict['IsOnTrack']:
                 # need to update the tick_dict within this loop to get the latest data and to drop out of the loop
-                # if the car is no longer on track
+                # if the car is no longer lapping the track
                 self.update_tick_dict()
                 # check if the lap completed value is different to what we have - indicating a lap has been completed
                 if self.tick_dict['LapCompleted'] != laps_complete:
@@ -71,9 +71,9 @@ class LapLogger(DataLogger):
                     self.lap_log_dict['lap'].append(session_lap)
                     session_lap += 1
                     # last lap times update a little after lap completion to set the collect lap time flag
-                    # so that the lat lap time gets collected when it changes
+                    # so that the lat lap time gets collected when it changes or after the maximum wait
                     collect_lap_time = True
-                    # append None to the other lists of the session dictionary as placeholder
+                    # append None to the other lists of the session dictionary as placeholder values
                     self.lap_log_dict['data'].append(None)
                     self.lap_log_dict['time'].append(None)
                     # get the fuel used, append the value to the session dictionary and reset the fuel level value
@@ -86,15 +86,15 @@ class LapLogger(DataLogger):
                     # if lap time is to be collected and either the last lap time has changed or the maximum
                     # collection wait (tick) has been exceeded then go ahead and collect it
 
-                    # rest the values that control lap time collection
+                    # rest the value, flag and counter that control lap time collection
                     last_lap_time = self.tick_dict['LapLastLapTime']
                     collect_lap_time = False
                     lap_collect_tick = 0
 
                     # replace the placeholder in the session dictionary with the lap time value
                     self.lap_log_dict['time'][-1] = last_lap_time
-                    # use the get_time_str function to see if there is a valid lap time and replace the placeholder
-                    # in the session dictionary accordingly
+                    # use the get_time_str function to see if there is a valid lap time values and replace
+                    # the placeholder in the session dictionary accordingly
                     if get_time_str(last_lap_time) != 'No data':
                         self.lap_log_dict['data'][-1] = True
                     else:
@@ -112,9 +112,12 @@ class LapLogger(DataLogger):
 
                 elif collect_lap_time:
                     # if a lap time is to be collected but has not been then increment the collection tick counter
+                    # (when this reaches the max_lap_collect_tick the last lap time value will be collected even
+                    # if it hasn't changed)
                     lap_collect_tick += 1
 
-        # once the while loop exits (car is no longer on track) check to see if there is data in the session dictionary
+        # once the while loop exits (car is no longer lapping the track)
+        # check to see if there is data in the session dictionary..
         if len(self.lap_log_dict['data']) > 0:
             # if there is then generate a summary and then clear the session dictionary
             self.generate_summary()
@@ -136,9 +139,9 @@ class LapLogger(DataLogger):
 
         # go through the data list in the session dictionary
         for idx, data in enumerate(self.lap_log_dict['data']):
-            # this will be true for laps with valid data and false otherwise
+            # this value will be true for laps with valid data and false otherwise
             if data:
-                # if there is data append the values it to the corresponding list
+                # if there is valid data append the values from the dictionary to the corresponding lists
                 lap_ls.append(self.lap_log_dict['lap'][idx])
                 time_ls.append(self.lap_log_dict['time'][idx])
                 fuel_ls.append(self.lap_log_dict['fuel'][idx])
@@ -180,7 +183,7 @@ class LapLogger(DataLogger):
                   f"\n\tMaximum: {max_fuel_str} / lap "
                   f"\n\t\t(exc. out lap)\n")
         else:
-            # if there are no valid laps in the lists then print no data
+            # if there are no valid laps in the lists then print no data instead
             print("\nNo summary data\n")
 
     def clear_session_data(self):

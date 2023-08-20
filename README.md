@@ -8,7 +8,7 @@ settings etc.
 ## Usage
 Run main.py and the tool will open in a python console window. On completion 
 of each lap the lap time and fuel used will be printed to the console. On 
-exiting the car a summary of lap times and fuel use will be added. Getting 
+exiting the car a summary of lap times and fuel use will be printed. Getting 
 back into the car will start a new lap logging session in the same window.
 
 The tool can also be run with an ibt telemetry file by specifying a file 

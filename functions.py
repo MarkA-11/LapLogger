@@ -1,6 +1,6 @@
 def get_time_str(laptime_float) -> str:
     """
-    Get a formatted time string from a float value
+    Get a formatted time string from a float value, return No data for None or <0 values
     :param laptime_float: time in seconds
     :return: formatted time string
     """

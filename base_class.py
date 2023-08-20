@@ -9,11 +9,11 @@ from this base class.
     The check_connection function will determine if a running sim is currently connected (or if an ibt file is to be 
     played back and if data is available from it - see below) and set the connected variable accordingly.
     
-    main.py will execute the classes loop function while connected to a running sim (or whilst playing back an ibt file 
+    main.py will execute the class's loop function while connected to a running sim (or whilst playing back an ibt file 
     - see below) with data collected at the defined sample rate (max 60 samples/sec). The keys of the data to be 
     collected are defined in the data_key_ls variable and the loop function in the base class updates the tick_dict 
-    variable with the latest sample ready to work with. The data sample can then be accessed in the loop function 
-    via the keys of the tick_dict.
+    dictionary with the latest values for these keys ready to work with. The data sample can then be accessed in the
+    loop function via the keys of the tick_dict dictionary.
     
     The loop function can be utilised in two different ways: The code can effectively be executed while the sim is 
     connected by treating the loop function as a single run through. Alternatively, code can be executed while a 
@@ -24,22 +24,22 @@ from this base class.
     sample from a running sim (or what would be the next data sample for the defined sample rate from an ibt file 
     - see below). 
     
-    The update_tick_dict function uses the base class's wait function and it is important that this is used for any
+    The update_tick_dict function uses the class's wait function and it is important that this is used for any
     pauses as this will ensure that the next sample is taken from the ibt file correctly and also enable real time ibt 
     playback as described below.  
     
-This class can run connected to the sim or from a specified ibt file, an ibt file can also effectively be played back 
+This class can run connected to the sim or from a specified ibt file. An ibt file can also effectively be played back 
 in real time (with the defined sample rate) by setting real_time_ibt to true. This also allows for development and 
 testing without the sim running but it is important to note that some parameters available from the ibt file 
-may not be available from the running sim and vice versa. 
+will not be available from the running sim and vice versa. 
 
     A list of variables available from a running sim can be obtained by creating an instance of the pyirsdk IRSDK 
     class, calling the startup function with a .bin test file and printing the the var_headers_names parameter.
     
     The pyirsdk IBT class typically does not include the session info parameters available from the sim. Consequently
-    these will not be available when the class is running with an ibt file. However, since these vary between session 
-    types, tracks, cars etc anyway, it is best practice to check if they exist first before trying to access them in 
-    any code.
+    these will not be available when this base class is running with an ibt file. However, since these vary between 
+    session types, tracks, cars etc anyway, it is best practice to check if they exist first before trying to access 
+    them in any code.
 """
 
 
