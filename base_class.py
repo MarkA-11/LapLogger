@@ -47,16 +47,22 @@ class DataLogger:
 
     def __init__(self, name, version, data_key_ls, sample_rate, ibt_file=None, real_time_ibt=False):
 
+        # add info_key_ls and set up an info_dict for session info items, data keys are telem items
         self.name = name
         self.version = version
         self.data_key_ls = data_key_ls
-        self.sample_rate = sample_rate  # samples per second, maximum 60
+
+        if sample_rate > 60:
+            sample_rate = 60
+        self.sample_rate = sample_rate
 
         self.ir = irsdk.IRSDK()
         self.ibt = irsdk.IBT()
 
         self.connected = False
         self.real_time_ibt = real_time_ibt
+
+        self.avail_data_headers = []
 
         self.tick_dict = dict.fromkeys(data_key_ls)
         self.ibt_dict = dict.fromkeys(data_key_ls)
@@ -77,6 +83,7 @@ class DataLogger:
             if not self.connected and self.ibt_data:
                 self.connected = True
                 print(f"\n{self.name} processing {self.ibt_file}, connected.... ")
+                self.update_avail_data_headers()
             elif self.connected and not self.ibt_data:
                 self.connected = False
                 print(f"\n{self.name} completed processing of {self.ibt_file}, disconnected.... ")
@@ -84,6 +91,7 @@ class DataLogger:
             if not self.connected and self.ir.startup():
                 self.connected = True
                 print(f"\n{self.name} connected to sim.... ")
+                self.update_avail_data_headers()
             elif self.connected and not self.ir.is_connected:
                 self.connected = False
                 print(f"\n{self.name} disconnected from sim.... ")
@@ -110,3 +118,12 @@ class DataLogger:
             self.ibt_tick += int(60 / self.sample_rate)
         if not self.ibt_file or (self.ibt_file and self.real_time_ibt):
             time.sleep(secs)
+
+    def update_avail_data_headers(self):
+        self.avail_data_headers = []
+        if self.ibt_file:
+            for header in self.ibt.var_headers_names:
+                self.avail_data_headers.append(header)
+        else:
+            for header in self.ir.var_headers_names:
+                self.avail_data_headers.append(header)
